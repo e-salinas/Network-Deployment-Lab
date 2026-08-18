@@ -54,8 +54,6 @@ I created VLANs 10, 20, 30, and 99 on both switches. I configured end-device swi
 
 I configured 802.1Q trunk links between R1 and SW1 and between SW1 and SW2, allowing traffic from all four VLANs to traverse the shared links.
 
-### VLAN Configuration
-
 | VLAN | Department / Purpose |
 |------|----------------------|
 | 10 | Admin |
@@ -87,3 +85,24 @@ During initial deployment, VLAN traffic was not passing as expected across the s
 I used `show vlan`, `show interfaces trunk`, and `show mac address-table` to verify VLAN membership, trunk status, and learned MAC addresses. Access ports were explicitly configured in access mode and the trunk configuration was corrected to carry the required VLANs.
 
 After correcting the configurations, VLAN membership and trunk operation were revalidated before continuing with Layer 3 configuration.
+
+## Inter-VLAN Routing & DHCP
+
+R1 provides inter-VLAN routing using a router-on-a-stick configuration. I created subinterfaces for each VLAN and used 802.1Q tagging so the VLANs could share the physical connection between R1 and SW1.
+
+The router also acts as the DHCP server for the Admin, Operations, and IT VLANs. Each DHCP pool provides clients with an IP address, subnet mask, and the correct default gateway for its VLAN.
+
+### Router Subinterfaces
+
+| Subinterface | VLAN | Gateway |
+|---|---:|---|
+| Gi0/0.10 | 10 - Admin | 192.168.10.1/24 |
+| Gi0/0.20 | 20 - Operations | 192.168.20.1/24 |
+| Gi0/0.30 | 30 - IT | 192.168.30.1/24 |
+| Gi0/0.99 | 99 - Management | 192.168.99.1/24 |
+
+### DHCP
+
+I configured DHCP pools on R1 for the three user VLANs and excluded the first several addresses in each subnet so they could be reserved for gateways, servers, or other infrastructure.
+
+I verified DHCP operation with `show ip dhcp binding` and checked the addressing received by the client PCs.
