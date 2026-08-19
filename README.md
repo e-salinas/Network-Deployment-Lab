@@ -112,7 +112,7 @@ I verified DHCP operation with `show ip dhcp binding` and checked the addressing
 
 ### Troubleshooting a DHCP Gateway Problem
 
-One of the Admin clients received an IP address through DHCP but could not communicate outside its local network, but DHCP was assigning an address.
+One of the Admin clients received an IP address through DHCP but could not communicate outside its local network.
 
 I checked the DHCP configuration and found that I had entered the Admin VLAN's default gateway as `102.168.10.1` instead of `192.168.10.1`.
 
@@ -120,3 +120,54 @@ I checked the DHCP configuration and found that I had entered the Admin VLAN's d
 
 After correcting the DHCP pool and renewing the client configuration, the PC was able to reach its gateway and communicate with hosts in the other VLANs.
 This was a simple typo, but it was a useful troubleshooting exercise.
+
+## Internal DNS
+
+I added an internal DNS server at `192.168.30.5` in the IT VLAN. The server provides name resolution for internal resources using the `mcorp.local` domain.
+
+I created a DNS record for:
+
+- `dns.mcorp.local` → `192.168.30.5`
+
+The DHCP pools on R1 were configured to provide the DNS server address to clients so they could use DNS without having to configure it manually.
+![DHCP Troubleshoot](img/DNS_.png)
+![DHCP Troubleshoot](img/DNS_config.png)
+
+## Management VLAN & SSH
+
+I created VLAN 99 as a dedicated management VLAN for the network switches. This keeps switch management separate from the Admin, Operations, and IT user VLANs.
+
+Because SW1 and SW2 are Layer 2 switches, I configured a Switch Virtual Interface (SVI) on each switch to provide an IP address for remote management.
+
+| Device | Management IP | Default Gateway |
+|---|---|---|
+| SW1 | 192.168.99.2/24 | 192.168.99.1 |
+| SW2 | 192.168.99.3/24 | 192.168.99.1 |
+
+R1 provides the Layer 3 gateway for the management VLAN through its `Gi0/0.99` subinterface at `192.168.99.1`. The switch SVIs provide management connectivity but do not perform the inter-VLAN routing.
+
+### Management SVI
+
+I configured the VLAN 99 SVI on each switch and verified that the interfaces were up/up.
+
+![Management SVI](img/SW1_SVI_Vlan99.png)
+
+### SSH Configuration
+
+I configured SSH so the switches could be managed remotely.
+
+The SSH configuration included:
+
+- A device hostname and local domain name
+- 2048-bit RSA keys
+- SSH version 2
+- A local administrative user
+- Local authentication on the VTY lines
+- SSH-only inbound VTY access
+![SSH](img/SSH_1.png)
+![SSH](img/SSH_v2.png)
+
+All VTY lines were configured with `login local` and `transport input ssh`, requiring authentication against the switch's local user database and preventing Telnet access.
+
+I was successfully able to log in.
+![SSH](img/SSH_login_succesful.png)
