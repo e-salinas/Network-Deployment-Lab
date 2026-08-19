@@ -70,27 +70,25 @@ I configured 802.1Q trunk links between R1 and SW1 and between SW1 and SW2, allo
 
 ### Verification
 
-VLAN membership was verified using `show vlan brief`, confirming that access ports were assigned to their intended VLANs.
+I verified VLAN membership using `show vlan brief`, confirming that access ports were assigned to their intended VLANs.
 
-![VLAN Verification](img/vlan-verification.png)
+![VLAN Verification](img/VLANS_created_SW1.png)
 
-802.1Q trunk operation and allowed VLANs were verified using `show interfaces trunk`.
+![VLAN Verification](img/ADMIN_PC_added_VLAN10.png)
 
-![Trunk Verification](img/trunk-verification.png)
+The 802.1Q trunk operation and allowed VLANs I verified using `show interfaces trunk`.
 
-### Troubleshooting: VLAN and Trunk Connectivity
+![Trunk Verification](img/Trunk_config_SW1G:02.png)
 
-During initial deployment, VLAN traffic was not passing as expected across the switch infrastructure. Verification of the trunk and access-port configurations revealed configuration issues affecting VLAN connectivity.
+![Trunk Verification](img/Trunk_interface_SW1.png)
 
-I used `show vlan`, `show interfaces trunk`, and `show mac address-table` to verify VLAN membership, trunk status, and learned MAC addresses. Access ports were explicitly configured in access mode and the trunk configuration was corrected to carry the required VLANs.
-
-After correcting the configurations, VLAN membership and trunk operation were revalidated before continuing with Layer 3 configuration.
 
 ## Inter-VLAN Routing & DHCP
 
 R1 provides inter-VLAN routing using a router-on-a-stick configuration. I created subinterfaces for each VLAN and used 802.1Q tagging so the VLANs could share the physical connection between R1 and SW1.
 
-The router also acts as the DHCP server for the Admin, Operations, and IT VLANs. Each DHCP pool provides clients with an IP address, subnet mask, and the correct default gateway for its VLAN.
+![Subinterfaces](img/Router_Subinterface_0.10_created&verified.png)
+![Subinterfaces](img/Router_Verification_subinterfaces_up.png)
 
 ### Router Subinterfaces
 
@@ -103,6 +101,22 @@ The router also acts as the DHCP server for the Admin, Operations, and IT VLANs.
 
 ### DHCP
 
-I configured DHCP pools on R1 for the three user VLANs and excluded the first several addresses in each subnet so they could be reserved for gateways, servers, or other infrastructure.
+The router also acts as the DHCP server for the Admin, Operations, and IT VLANs. Each DHCP pool provides clients with an IP address, subnet mask, and the correct default gateway for its VLAN.
+
+I configured DHCP pools on R1 for the three user VLANs and excluded the first several addresses in each subnet so they could be reserved for other infrastructure.
 
 I verified DHCP operation with `show ip dhcp binding` and checked the addressing received by the client PCs.
+
+![DHCP Config](img/DHCP_config.png)
+![DHCP Bindings](img/DHCP_bindings.png)
+
+### Troubleshooting a DHCP Gateway Problem
+
+One of the Admin clients received an IP address through DHCP but could not communicate outside its local network, but DHCP was assigning an address.
+
+I checked the DHCP configuration and found that I had entered the Admin VLAN's default gateway as `102.168.10.1` instead of `192.168.10.1`.
+
+![DHCP Troubleshoot](img/Noticed_Typo_DefaultGateway.png)
+
+After correcting the DHCP pool and renewing the client configuration, the PC was able to reach its gateway and communicate with hosts in the other VLANs.
+This was a simple typo, but it was a useful troubleshooting exercise.
