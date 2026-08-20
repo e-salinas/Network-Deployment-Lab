@@ -189,7 +189,7 @@ The firewall sits between R1 and the ISP and separates the internal network from
 
 I used /30 networks for the point-to-point transit links because only two usable addresses were needed on each link.
 
-[ISP-Router](img/ISP_R1.png)
+![ISP-Router](img/ISP_R1.png)
 
 
 ### Simulated External Network
