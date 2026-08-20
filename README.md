@@ -132,7 +132,7 @@ I created a DNS record for:
 The DHCP pools on R1 were configured to provide the DNS server address to clients so they could use DNS without having to configure it manually.
 ![DHCP Troubleshoot](img/DNS_.png)
 ![DHCP Troubleshoot](img/DNS_config.png)
-![DHCP Troubleshoot](img/Connectivity_test_DNS)
+![DHCP Troubleshoot](img/Connectivity_test_DNS.png)
 
 ## Management VLAN & SSH
 
