@@ -1,4 +1,4 @@
-## Network Deployment & Troubleshooting Lab
+## Network Deployment Lab
 
 ## Project Overview
 
