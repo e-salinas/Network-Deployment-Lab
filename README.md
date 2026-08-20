@@ -171,3 +171,74 @@ All VTY lines were configured with `login local` and `transport input ssh`, requ
 
 I was successfully able to log in.
 ![SSH](img/SSH_login_succesful.png)
+
+
+## Firewall & Internet Edge
+
+I extended the lab by adding a Cisco ASA firewall, a simulated ISP router, and an external server.
+
+The firewall sits between R1 and the ISP and separates the internal network from the simulated Internet.
+
+
+### Point-to-Point Transit Links
+
+| Connection | Network | Addresses |
+|---|---|---|
+| R1 ↔ FW1 | 10.0.0.0/30 | R1: 10.0.0.1, FW1: 10.0.0.2 |
+| FW1 ↔ ISP-R1 | 203.0.113.0/30 | FW1: 203.0.113.1, ISP-R1: 203.0.113.2 |
+
+I used /30 networks for the point-to-point transit links because only two usable addresses were needed on each link.
+
+[ISP-Router](img/ISP_R1.png)
+
+
+### Simulated External Network
+
+The `198.51.100.0/24` network represents a network outside of MCorp and provides a destination for testing end-to-end connectivity through the firewall and ISP.
+
+| Device | Address |
+|---|---|
+| ISP-R1 | 198.51.100.1/24 |
+| INTERNET-SRV | 198.51.100.10/24 |
+
+
+### Routing
+
+R1 uses a default route pointing toward FW1 for traffic destined outside the internal VLANs.
+
+FW1 has static routes back to the internal VLAN networks through R1 and a default route toward ISP-R1.
+
+This provides a complete path from the internal VLANs through the firewall while also giving return traffic a route back to the correct internal networks.
+
+I used `show route` on the ASA to verify the internal static routes, directly connected networks, and default route toward the ISP.
+
+![ASA Routing Table](img/FW1_Inside_static_routes.png)
+![ASA Routing Table](img/FW1_Default_outside_Gateway.png)
+
+
+### PAT
+
+I configured Port Address Translation (PAT) on FW1 for outbound traffic.
+
+Each internal VLAN was defined as a network object and configured for dynamic translation from the ASA inside interface to the outside interface address.
+
+This allows multiple internal hosts to share FW1's outside address of `203.0.113.1` when communicating with the simulated external network.
+
+![PAT](img/FW1_PAT_VLANS.png)
+![PAT](img/PAT_config.png)
+
+
+### Troubleshooting: PAT and ICMP
+
+After configuring the routes and PAT, the internal PCs failed to ping the ISP router at `203.0.113.2`.
+
+I checked the path one section at a time. R1 could reach FW1, FW1 could reach ISP-R1, and the routing tables looked correct. I verified the PAT configuration was present.  The `show xlate` was not showing an active translation when the client ping failed.
+
+After doing some research, I suspected the problem might be related to ICMP inspection on the ASA in Packet Tracer. I checked the firewall policy configuration and there was no active global inspection policy.
+
+I configured an inspection class for the default traffic, added ICMP inspection to the global policy, and applied the policy globally:
+
+![TroubleICMP](img/Class_Inspection.png)
+![TroubleshootICMP](img/Policy-map_icmp.png)
+![TroubleshootICMP](img/Successful_ping_ISP_R1.png)
+![TroubleshootICMP](img/Show_xlate_PAT.png)
