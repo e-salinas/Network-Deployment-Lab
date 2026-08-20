@@ -132,10 +132,11 @@ I created a DNS record for:
 The DHCP pools on R1 were configured to provide the DNS server address to clients so they could use DNS without having to configure it manually.
 ![DHCP Troubleshoot](img/DNS_.png)
 ![DHCP Troubleshoot](img/DNS_config.png)
+![DHCP Troubleshoot](img/Connectivity_test_DNS)
 
 ## Management VLAN & SSH
 
-I created VLAN 99 as a dedicated management VLAN for the network switches. This keeps switch management separate from the Admin, Operations, and IT user VLANs.
+I created VLAN 99 as a dedicated management VLAN for the network switches. This keeps switch management separate from the Admin, Operations, and IT user VLANs.  
 
 Because SW1 and SW2 are Layer 2 switches, I configured a Switch Virtual Interface (SVI) on each switch to provide an IP address for remote management.
 
@@ -194,7 +195,7 @@ I used /30 networks for the point-to-point transit links because only two usable
 
 ### Simulated External Network
 
-The `198.51.100.0/24` network represents a network outside of MCorp and provides a destination for testing end-to-end connectivity through the firewall and ISP.
+The 198.51.100.0/24 network represents a network outside of MCorp and provides a destination for testing end-to-end connectivity through the firewall and ISP.
 
 | Device | Address |
 |---|---|
@@ -222,7 +223,7 @@ I configured Port Address Translation (PAT) on FW1 for outbound traffic.
 
 Each internal VLAN was defined as a network object and configured for dynamic translation from the ASA inside interface to the outside interface address.
 
-This allows multiple internal hosts to share FW1's outside address of `203.0.113.1` when communicating with the simulated external network.
+This allows multiple internal hosts to share FW1's outside address of 203.0.113.1 when communicating with the simulated external network.
 
 ![PAT](img/FW1_PAT_VLANS.png)
 ![PAT](img/PAT_config.png)
@@ -230,7 +231,7 @@ This allows multiple internal hosts to share FW1's outside address of `203.0.113
 
 ### Troubleshooting: PAT and ICMP
 
-After configuring the routes and PAT, the internal PCs failed to ping the ISP router at `203.0.113.2`.
+After configuring the routes and PAT, the internal PCs failed to ping the ISP router at 203.0.113.2.
 
 I checked the path one section at a time. R1 could reach FW1, FW1 could reach ISP-R1, and the routing tables looked correct. I verified the PAT configuration was present.  The `show xlate` was not showing an active translation when the client ping failed.
 
@@ -242,3 +243,18 @@ I configured an inspection class for the default traffic, added ICMP inspection 
 ![TroubleshootICMP](img/Policy-map_icmp.png)
 ![TroubleshootICMP](img/Successful_ping_ISP_R1.png)
 ![TroubleshootICMP](img/Show_xlate_PAT.png)
+
+
+## Final Validation Testing
+
+After completing the network configuration, I ran a final set of tests to verify connectivity across the internal network and through the simulated Internet edge.
+
+### End-to-End Internet Connectivity
+
+I tested connectivity to `INTERNET-SRV` at `198.51.100.10` from clients in each of the three user VLANs.
+
+![TroubleshootICMP](img/Connectivity_test_ops.png)
+![TroubleshootICMP](img/Connectivity_test_admin.png)
+![TroubleshootICMP](img/Connectivity_test_IT.png)
+
+These tests verified the complete traffic path from the client through the switches, R1, FW1, ISP-R1, and finally to the external server.
