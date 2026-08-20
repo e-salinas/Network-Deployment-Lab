@@ -4,7 +4,7 @@
 
 This project simulates the deployment of a segmented small-enterprise network in Cisco Packet Tracer. The network was designed with separate Admin, Operations, IT, and Management VLANs, with inter-VLAN routing, DHCP, internal DNS, secure SSH management, and an ASA firewall providing PAT and connectivity to a simulated ISP and external network.
 
-I created this project to better understand what I studied for the Network + certification.  This really helped cement what I learned and provided great practice with device configuration on the Cisco ISO.  
+I created this project to better understand what I studied for the Network + certification.  Building the network helped cement what I learned and gave me hands-on practice with configuring Cisco IOS devices.  
 
 ## Network Topology
 
@@ -76,7 +76,7 @@ I verified VLAN membership using `show vlan brief`, confirming that access ports
 
 ![VLAN Verification](img/ADMIN_PC_added_VLAN10.png)
 
-The 802.1Q trunk operation and allowed VLANs I verified using `show interfaces trunk`.
+I verified the 802.1Q trunk operation and allowed VLANs using `show interfaces trunk`.
 
 ![Trunk Verification](img/Trunk_config_SW1G:02.png)
 
@@ -221,7 +221,7 @@ I used `show route` on the ASA to verify the internal static routes, directly co
 
 I configured Port Address Translation (PAT) on FW1 for outbound traffic.
 
-Each internal VLAN was defined as a network object and configured for dynamic translation from the ASA inside interface to the outside interface address.
+I defined the user networks Admin, OPS, and IT as network objects and configured them for dynamic translation from the ASA inside interface to the outside interface address.
 
 This allows multiple internal hosts to share FW1's outside address of 203.0.113.1 when communicating with the simulated external network.
 
@@ -237,7 +237,7 @@ I checked the path one section at a time. R1 could reach FW1, FW1 could reach IS
 
 After doing some research, I suspected the problem might be related to ICMP inspection on the ASA in Packet Tracer. I checked the firewall policy configuration and there was no active global inspection policy.
 
-I configured an inspection class for the default traffic, added ICMP inspection to the global policy, and applied the policy globally:
+I configured an inspection class for the default traffic, added ICMP inspection to the global policy, and applied the policy globally. The client ping was then successful and show xlate showed an active ICMP PAT translation.
 
 ![TroubleICMP](img/Class_Inspection.png)
 ![TroubleshootICMP](img/Policy-map_icmp.png)
