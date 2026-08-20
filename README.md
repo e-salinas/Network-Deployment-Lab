@@ -8,7 +8,7 @@ I created this project to better understand what I studied for the Network + cer
 
 ## Network Topology
 
-![MCorp Network Topology](img/network-topology.png)
+![MCorp Network Topology](img/Network-topology_mcorp.png)
 
 ## Project Requirements & Design
 
